@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Encryptor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        input[type=file], input[type=password] {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+        }
+        /* Стилі для вікна сповіщення */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Encryptor</h1>
+    
+    <!-- Елемент для відображення сповіщень -->
+    <div id="notification" class="notification"></div>
+    
+    <div class="container">
+        <h2>Upload File</h2>
+        <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="file">Select File:</label>
+                <input type="file" id="file" name="file" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <input type="submit" value="Upload" class="btn">
+        </form>
+        <div class="info">
+            After uploading your file, use the encryption or decryption options below.
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>File Operations</h2>
+        <div>
+            <button class="btn" id="encryptBtn">Encrypt Uploaded File</button>
+            <p>Click this button to encrypt the file you've uploaded with your password.</p>
+        </div>
+        <div style="margin-top: 20px;">
+            <button class="btn" id="decryptBtn">Decrypt File</button>
+            <p>Click this button to decrypt the previously encrypted file.</p>
+        </div>
+        <div style="margin-top: 20px;">
+            <a href="/download" class="btn">Download Processed File</a>
+            <p>Click this button to download your processed file.</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Instructions</h2>
+        <ol>
+            <li>First, upload your file and provide a password.</li>
+            <li>Then, choose to encrypt or decrypt the file as needed.</li>
+            <li>Finally, download the processed file to your computer.</li>
+        </ol>
+        <p><strong>Note:</strong> Make sure to remember your password for decryption!</p>
+    </div>
+    
+    <script>
+        // Функція для відображення сповіщень
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            // Приховати сповіщення через 3 секунди
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Обробник для форми завантаження файлу
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Запобігає стандартній відправці форми
+            
+            const formData = new FormData(this);
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    showNotification('File successfully uploaded!');
+                    return response.text();
+                }
+                throw new Error('Error while uploading file');
+            })
+            .catch(error => {
+                showNotification('Помилка: ' + error.message);
+            });
+        });
+        
+        // Обробник для кнопки шифрування
+        document.getElementById('encryptBtn').addEventListener('click', function() {
+            fetch('/encryption')
+            .then(response => {
+                if (response.ok) {
+                    showNotification('File successfully encrypted!');
+                    return response.text();
+                }
+                throw new Error('Error while encrypting file');
+            })
+            .catch(error => {
+                showNotification('Помилка: ' + error.message);
+            });
+        });
+        
+        // Обробник для кнопки дешифрування
+        document.getElementById('decryptBtn').addEventListener('click', function() {
+            fetch('/decryption')
+            .then(response => {
+                if (response.ok) {
+                    showNotification('File successfully decrypted!');
+                    return response.text();
+                }
+                throw new Error('Error while decrypting file');
+            })
+            .catch(error => {
+                showNotification('Помилка: ' + error.message);
+            });
+        });
+    </script>
+</body>
+</html>
